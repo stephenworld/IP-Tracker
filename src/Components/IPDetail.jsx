@@ -1,12 +1,14 @@
 import IPInfo from "./IPInfo";
 
-export default function IPDetail() {
+export default function IPDetail({ data }) {
   return (
-    <section className="absolute bg-white w-8/10 p-8 left-1/10 right-1/10 rounded-xl top-[20%] shadow-lg flex gap-4">
-      <IPInfo title="IP Address" content="" />
-      <IPInfo title="Location" content="" />
-      <IPInfo title="Timezone" content="" />
-      <IPInfo title="ISP" content="" />
-    </section>
+    <>
+      <section className="fixed left-1/2 -translate-x-1/2 top-[17.5%] md:top-[20%] z-999 bg-white w-9/10 md:w-8/10 p-8 rounded-xl shadow-lg flex flex-col md:flex-row gap-4">
+        <IPInfo title="IP Address" content={data.ip} />
+        <IPInfo title="Location" content={`${data.location.city}`} />
+        <IPInfo title="Timezone" content={data.location.timezone} />
+        <IPInfo title="ISP" content={data.isp} />
+      </section>
+    </>
   );
 }
