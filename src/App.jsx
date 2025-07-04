@@ -24,8 +24,7 @@ export default function App() {
   function handleSubmit(e) {
     e.preventDefault();
     const API_KEY = "at_Exzd1IFm0dzpSdXFFPwQNr71KR1up";
-    const url = `https://geo.ipify.org/api/v2/country,city?apiKey=${API_KEY}&ipAddress=${input}`;
-
+    const url = `https://geo.ipify.org/api/v2/country,city,vpn?apiKey=${API_KEY}&ipAddress=${input}&domain=${input}`;
     fetch(url)
       .then((res) => res.json())
       .then((data) => setFormData(data));
