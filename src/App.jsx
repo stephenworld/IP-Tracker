@@ -1,11 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Form from "./Components/Form";
 import IPDetail from "./Components/IPDetail";
 import Map from "./Components/Map";
 import desktopBackground from "./assets/images/pattern-bg-desktop.png";
 import mobileBackground from "./assets/images/pattern-bg-mobile.png";
-const isMobile = window.innerWidth <= 768;
-const bgImage = isMobile ? mobileBackground : desktopBackground;
+
 const dummyData = {
   ip: "8.8.8.8",
   location: {
@@ -18,13 +17,6 @@ const dummyData = {
     timezone: "-07:00",
     geonameId: 5375481,
   },
-  domains: [
-    "0d2.net",
-    "003725.com",
-    "0f6.b0094c.cn",
-    "007515.com",
-    "0guhi.jocose.cn",
-  ],
   as: {
     asn: 15169,
     name: "Google LLC",
@@ -34,19 +26,59 @@ const dummyData = {
   },
   isp: "Google LLC",
 };
+
 export default function App() {
   const [formData, setFormData] = useState(dummyData);
   const [input, setInput] = useState("");
+  const [err, setErr] = useState(null);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [loading, setLoading] = useState(false);
+
+  const bgImage = isMobile ? mobileBackground : desktopBackground;
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  useEffect(() => {
+    console.log("Form data updated:", formData);
+  }, [formData]);
+
   function handleSubmit(e) {
     e.preventDefault();
+
+    const ipRegex =
+      /^(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)){3}$/;
+
+    const isIP = ipRegex.test(input);
+    if (!isIP && !/^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(input)) {
+      setErr("Please enter a valid IP address or domain.");
+      return;
+    }
+
+    setLoading(true);
+    setErr(null);
+
     const API_KEY = "at_fp8LbMNVHk5bFCjsPSeVTZ0pX74c9";
-    const url = `https://geo.ipify.org/api/v2/country,city?apiKey=${API_KEY}&ipAddress=${input}&domain=${input}`;
+    const url = `https://geo.ipify.org/api/v2/country,city?apiKey=${API_KEY}&${
+      isIP ? "ipAddress" : "domain"
+    }=${encodeURIComponent(input)}`;
+
     fetch(url)
       .then((res) => res.json())
-      .then((data) => setFormData(data));
-
-    console.log(formData);
+      .then((data) => {
+        setFormData(data);
+        setErr(null);
+      })
+      .catch((error) => {
+        setErr("Failed to fetch data.");
+        console.error("Error fetching data:", error);
+      })
+      .finally(() => setLoading(false));
   }
+
   return (
     <main className="h-screen relative">
       <section
@@ -64,15 +96,25 @@ export default function App() {
             input={input}
             handleInput={(e) => setInput(e.target.value)}
           />
+          {err && (
+            <p className="text-red-300 text-sm mt-2 text-center">{err}</p>
+          )}
         </div>
       </section>
-      <Map
-        position={[
-          formData?.location?.lat || 6.5244,
-          formData?.location?.lng || 3.3792,
-        ]}
-      />
-      <IPDetail data={formData} />
+
+      {loading ? (
+        <p className="text-center mt-10 font-medium">Loading...</p>
+      ) : (
+        <>
+          <Map
+            position={[
+              formData?.location?.lat || 6.5244,
+              formData?.location?.lng || 3.3792,
+            ]}
+          />
+          <IPDetail data={formData} />
+        </>
+      )}
     </main>
   );
 }
