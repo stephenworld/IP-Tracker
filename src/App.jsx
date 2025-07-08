@@ -23,7 +23,7 @@ export default function App() {
   const [input, setInput] = useState("");
   function handleSubmit(e) {
     e.preventDefault();
-    const API_KEY = "at_Exzd1IFm0dzpSdXFFPwQNr71KR1up";
+    const API_KEY = "at_fp8LbMNVHk5bFCjsPSeVTZ0pX74c9";
     const url = `https://geo.ipify.org/api/v2/country,city?apiKey=${API_KEY}&ipAddress=${input}&domain=${input}`;
     fetch(url)
       .then((res) => res.json())
